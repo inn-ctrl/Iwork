@@ -1,0 +1,74 @@
+--WINDOW FUNCTIONS--
+--THESE NOTES USE products table in the northwind db
+/*
+rank, dense rank, row number, lead, lag, agg
+*/
+
+SELECT supplierid, sum(unitprice) as totbysup
+FROM products
+GROUP BY supplierid
+--sum by products window function--
+SELECT pr.*, 
+sum(unitprice :: int) over() as totalbyproducts
+FROM products as pr
+
+--partition by suppliers window function--
+SELECT pr.*, 
+sum(unitprice :: int) over(partition by supplierid) as totalbysupplier
+FROM products as pr
+ORDER BY supplierid
+
+--designated window functions--
+--1.row_number()--
+-- rank activities of each supplier--
+SELECT pr.*,
+row_number() over(partition by supplierid) as supplirperforms
+FROM products pr
+--with that you can get the best performing supplier
+SELECT pr.*,
+row_number() over(partition by supplierid order by unitprice desc) as supplirperforms
+FROM products pr
+
+-- we can use a sub query to get the best performing supplier across all
+SELECT * 
+FROM(
+	SELECT pr.*,
+	row_number() over(partition by supplierid order by unitprice desc) as supplierperforms
+	FROM products pr
+	) as supplierrank
+WHERE supplierrank.supplierperforms = 1 --or WHERE supplierrank.supplierperforms < 2
+--same can be used to make every filtering
+
+--2. RANKING
+--simply fetch top three suppliers overall using rank
+-- the process is to simply rank all of them
+-- and extract the top three performers
+
+
+-- i will rank products based on suppliers by using revs
+SELECT * 
+FROM (
+	SELECT pr.*, 
+	RANK() over(partition by supplierid order by unitprice desc) as overallsupplierranks
+	FROM products as pr
+) AS rankedsups
+WHERE rankedsups.overallsupplierranks < 3
+--note: rank will give same rank to duplicate values
+--note: row_number works like rank but it will never give same values to duplicates. it only
+--counts row's occurance
+
+---3. dense_rank: it works like rank but does not skip repeating values
+
+-- 4. LEAD and LAG
+-- 4.1. LAG -- compares a row with previous value
+-- lag allw us to fetch data across rows without having to join
+--e.g: check if the price of the prod. is higher, equal, or lower
+--to the previous one
+SELECT pr.*,
+lag(unitprice) over (partition by supplierid order by productname) as prev_value
+FROM products pr
+--the first value is null due to lack of prev.
+-- lag can take three arguments: 
+-- lag(unitprice, 2, 0) unitprice means the current value, 
+-- 2 means 'jump two places before' and 0 means defalt value (at indez 0 or the first in this case)
+
