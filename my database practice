@@ -1,0 +1,26 @@
+/*create 4 tables: customer, emp., sup., prod.*/
+CREATE TABLE customers (
+	id int,
+	first_name varchar(255),
+	last_name varchar(255),
+	address varchar(255),
+	phone varchar(255)
+);
+
+CREATE TABLE employee (
+	eid int,
+	first_name varchar(255),
+	last_name varchar(255),
+	deptid varchar(255)
+);
+
+CREATE TABLE supplier(
+	sid int,
+	companyname varchar(255),
+	address varchar(255)
+);
+
+CREATE TABLE products(
+	pid int,
+	sid int
+);
