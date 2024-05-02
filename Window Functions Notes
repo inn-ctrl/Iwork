@@ -1,4 +1,4 @@
---WINDOW FUNCTIONS--
+--WINDOW FUNCTIONS-- next is cte
 --THESE NOTES USE products table in the northwind db
 /*
 rank, dense rank, row number, lead, lag, agg
